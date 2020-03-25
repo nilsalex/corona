@@ -16,7 +16,7 @@ someFunc = putStrLn "someFunc"
 type DataSet = ([B.ByteString], (M.Map B.ByteString [Int]))
 
 url :: String
-url = "http://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv"
+url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv"
 
 addLists :: Num a => [a] -> [a] -> [a]
 addLists = zipWith (+)
@@ -67,3 +67,13 @@ plotCountryLog (dates, rows) country = scatter xs $ fmap (log . fromIntegral . (
   where
     ys = rows M.! country
     xs = zipWith const [0..] dates
+
+diffs :: Num a => [a] -> [a]
+diffs xs = zipWith (-) (tail xs) xs
+
+plotCountryNew :: DataSet -> B.ByteString -> Matplotlib
+plotCountryNew (dates, rows) country = foldr (%) mp $ zipWith (\x y -> bar x y) xs (0 : diffs ys)
+  where
+    ys = (rows M.! country)
+    xs  = zipWith const [0..] $ ys
+
