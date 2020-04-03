@@ -1,4 +1,5 @@
 {-# LANGUAGE ExtendedDefaultRules #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Lib where
 
@@ -93,3 +94,46 @@ plotCountryDoubling (dates, rows) country n = plot xs ds
     gs = growthRate as
     ds = reverse $ take n $ reverse $ fmap (\x -> log 2 / x) gs
     xs = zipWith const [0..] ds
+
+europe :: [B.ByteString]
+europe = [ "Italy"
+         , "France"
+         , "Spain"
+         , "Austria"
+         , "Switzerland"
+         , "Germany"
+         , "Poland"
+         , "Portugal"
+         , "Belgium"
+         , "Netherlands"
+         , "Denmark"
+         , "Sweden"
+         , "Norway"
+         , "Finland"
+         , "China"
+         , "Korea, South"
+         , "Japan"
+         , "Singapore"
+         , "US"
+         , "Canada" ]
+
+plotEurope :: IO ()
+plotEurope = do
+  m <- download
+  mapM_ (\country -> do
+    let pc = plotCountryDoubling m "US" 20 @@ [o2 "label" (B.unpack country)]
+    let p = xlabel "last 20 days (as of 3 April 2020)" %
+            ylabel "doubling time of reported cases" %
+            xticks (take 20 [0..]) %
+            pc %
+            legend @@ [o2 "loc" "upper left"]
+    res <- file ("plots/" <> B.unpack country <> ".pdf") p
+    print res) europe
+
+plotUSvsSweden :: IO Matplotlib
+plotUSvsSweden = do
+  m <- download
+  let pUS = plotCountryDoubling m "US" 20 @@ [o2 "label" "US"]
+  let pSw = plotCountryDoubling m "Sweden" 20 @@ [o2 "label" "Sweden"]
+  let p = xlabel "last 20 days" % ylabel "doubling time of positive tests" % xticks (take 20 [0..]) % pUS % pSw
+  return $ p % legend @@ [o2 "loc" "upper left"]
