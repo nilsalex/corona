@@ -71,9 +71,25 @@ plotCountryLog (dates, rows) country = scatter xs $ fmap (log . fromIntegral . (
 diffs :: Num a => [a] -> [a]
 diffs xs = zipWith (-) (tail xs) xs
 
+average :: Fractional a => [a] -> [a]
+average (x1:x2:x3:x4:x5:xs) = (x1+x2+x3+x4+x5)/5 : average (x2:x3:x4:x5:xs)
+average _ = []
+
+growthRate :: Fractional a => [a] -> [a]
+growthRate (x1:x2:x3:xs) = (x3 - x1) / (2 * x2) : growthRate (x2:x3:xs)
+growthRate _ = []
+
 plotCountryNew :: DataSet -> B.ByteString -> Matplotlib
 plotCountryNew (dates, rows) country = foldr (%) mp $ zipWith (\x y -> bar x y) xs (0 : diffs ys)
   where
     ys = (rows M.! country)
     xs  = zipWith const [0..] $ ys
 
+plotCountryDoubling :: DataSet -> B.ByteString -> Int -> Matplotlib
+plotCountryDoubling (dates, rows) country n = plot xs ds
+  where
+    ys = fmap fromIntegral $ rows M.! country
+    as = average ys
+    gs = growthRate as
+    ds = reverse $ take n $ reverse $ fmap (\x -> log 2 / x) gs
+    xs = zipWith const [0..] ds
