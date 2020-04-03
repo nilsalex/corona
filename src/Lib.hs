@@ -121,7 +121,7 @@ plotEurope :: IO ()
 plotEurope = do
   m <- download
   mapM_ (\country -> do
-    let pc = plotCountryDoubling m "US" 20 @@ [o2 "label" (B.unpack country)]
+    let pc = plotCountryDoubling m country 20 @@ [o2 "label" (B.unpack country)]
     let p = xlabel "last 20 days (as of 3 April 2020)" %
             ylabel "doubling time of reported cases" %
             xticks (take 20 [0..]) %
